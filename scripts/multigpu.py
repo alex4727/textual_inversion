@@ -129,32 +129,27 @@ def get_args():
     parser.add_argument(
         "--fill_imagenet",
         action='store_true',
-        help="whether to fill imagenet"
+        help="whether to fill dataset"
     )
     parser.add_argument(
-        "--imagenet_path",
-        type=str,
-        help="path to imagenet"
+        "--fill_cifar10",
+        action='store_true',
+        help="whether to fill cifar10"
     )
     parser.add_argument(
-        "--imagenet_out_path",
+        "--fill_cifar100",
+        action='store_true',
+        help="whether to fill cifar100"
+    )
+    parser.add_argument(
+        "--dataset_out_path",
         type=str,
-        help="path for filled imagenet"
+        help="path for filled dataset"
     )
     parser.add_argument(
         "--target_images",
         type=int,
         help="number of target images per class"
-    )
-    parser.add_argument(
-        "--force_target",
-        action='store_true',
-        help="whether to force target images"
-    )
-    parser.add_argument(
-        "--move_real_images",
-        action='store_true',
-        help='whether to move real images to fake images (required only once)'
     )
     parser.add_argument(
         "--start_idx",
@@ -234,7 +229,7 @@ def save_image_grid(all_gpu_samples, opt, grid=True):
         img.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
         grid_count += 1
 
-def save_imagenet(all_gpu_samples, cls_idx, output_path):
+def save_dataset(all_gpu_samples, cls_idx, output_path):
     count = 0
     for sample in all_gpu_samples:
         sample = 255. * rearrange(sample.cpu().numpy(), 'c h w -> h w c')
@@ -243,15 +238,14 @@ def save_imagenet(all_gpu_samples, cls_idx, output_path):
         img.save(os.path.join(output_path, f"fake_{cls_idx}_{count:04}.JPEG"))
         count += 1
 
-def save_imagenet_chunk(all_gpu_samples, cls_idx, output_path):
+def save_dataset_chunk(all_gpu_samples, cls_idx, output_path):
     all_gpu_samples = 255. * rearrange(all_gpu_samples.cpu().numpy(), 'b c h w -> b h w c')
     np.save(os.path.join(output_path, f"fake_{cls_idx}.npy"), all_gpu_samples.astype(np.uint8))
 
 def prepare_imagenet_stats(opt):
     print("Preparing imagenet stats")
     imagenet_stats = dict()
-    real_images = 0
-    with open("ImageNet-LT/ImageNet_labels.txt", "r") as f:
+    with open("dataset_info/ImageNet_labels.txt", "r") as f:
         lines = f.read().splitlines()
         cls_ids, cls_idxs, cls_names = zip(*[i.split(" ") for i in lines])
         for cls_id, cls_idx, cls_name in zip(cls_ids, cls_idxs, cls_names):
@@ -259,28 +253,42 @@ def prepare_imagenet_stats(opt):
             sample_dict['name'] = cls_name
             sample_dict['id'] = cls_id
             sample_dict['idx'] = cls_idx
-            sample_dict['num'] = 0
             sample_dict['prompt'] = f"a photo of a {cls_name.replace('_', ' ')}"
             imagenet_stats[cls_idx] = sample_dict
-            os.makedirs(os.path.join(f"{opt.imagenet_out_path}", "train", f"{cls_id}"), exist_ok=True)
+            os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
+    return imagenet_stats
 
-    with open("ImageNet-LT/ImageNet_LT_train.txt", "r") as f:
+def prepare_cifar10_stats(opt):
+    print("Preparing cifar10 stats")
+    cifar10_stats = dict()
+    with open("dataset_info/cifar10-labels.txt", "r") as f:
         lines = f.read().splitlines()
-        subset_image_list, subset_label_list = zip(*[i.split(" ") for i in lines])
-        count = 0
-        prev_label = 0
-        for img, label in zip(subset_image_list, subset_label_list):
-            imagenet_stats[label]['num'] += 1
-            real_images += 1
-            if prev_label != label:
-                count = 0
-                prev_label = label
-            if opt.move_real_images:
-                new_name = f"{img[:img.rfind('/')]}/real_{label}_{count:04}.JPEG"
-                shutil.copy(os.path.join(f"{opt.imagenet_path}", img), os.path.join(f"{opt.imagenet_out_path}", new_name))
-            count += 1
+        cls_ids, cls_idxs, cls_names = zip(*[i.split(" ") for i in lines])
+        for cls_id, cls_idx, cls_name in zip(cls_ids, cls_idxs, cls_names):
+            sample_dict = dict()
+            sample_dict['name'] = cls_name
+            sample_dict['id'] = cls_id
+            sample_dict['idx'] = cls_idx
+            sample_dict['prompt'] = f"a photo of a {cls_name.replace('_', ' ')}"
+            cifar10_stats[cls_idx] = sample_dict
+            os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
+    return cifar10_stats
 
-    return imagenet_stats, real_images
+def prepare_cifar100_stats(opt):
+    print("Preparing cifar100 stats")
+    cifar100_stats = dict()
+    with open("dataset_info/cifar100-labels.txt", "r") as f:
+        lines = f.read().splitlines()
+        cls_ids, cls_idxs, cls_names = zip(*[i.split(" ") for i in lines])
+        for cls_id, cls_idx, cls_name in zip(cls_ids, cls_idxs, cls_names):
+            sample_dict = dict()
+            sample_dict['name'] = cls_name
+            sample_dict['id'] = cls_id
+            sample_dict['idx'] = cls_idx
+            sample_dict['prompt'] = f"a photo of a {cls_name.replace('_', ' ')}"
+            cifar100_stats[cls_idx] = sample_dict
+            os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
+    return cifar100_stats
 
 def run(rank, opt):
     torch.cuda.set_device(rank)
@@ -368,7 +376,7 @@ def fill(rank, opt):
     if rank == 0:
         generated_images_counter = 0
 
-    for cls_idx, cls_dict in opt.imagenet_stats.items():
+    for cls_idx, cls_dict in opt.dataset_stats.items():
         if int(cls_idx) < int(opt.start_idx):
             continue
         if int(cls_idx) > int(opt.end_idx):
@@ -377,8 +385,8 @@ def fill(rank, opt):
             break
         if rank == 0:
             current_time = datetime.now().strftime('%Y_%b%d_%H-%M-%S')
-            print(f"{current_time} | Start Generating {cls_dict['name']} (id: {cls_idx}, num real: {cls_dict['num']}) | {generated_images_counter}/{opt.total_images_to_generate} generated so far", flush=True)
-        num_generate = opt.target_images - cls_dict['num'] if not opt.force_target else opt.target_images
+            print(f"{current_time} | Start Generating {cls_dict['name']} (id: {cls_idx}) | {generated_images_counter}/{opt.total_images_to_generate} generated so far", flush=True)
+        num_generate = opt.target_images
         n_iter = num_generate // opt.n_samples if num_generate % opt.n_samples == 0 else num_generate // opt.n_samples + 1
         n_drop = n_iter * opt.n_samples - num_generate 
         prompt = cls_dict['prompt']
@@ -424,34 +432,40 @@ def fill(rank, opt):
             all_gpu_samples = torch.cat(all_gpu_samples, dim=0)
             all_gpu_samples = all_gpu_samples[:-n_drop] if n_drop > 0 else all_gpu_samples
             generated_images_counter += all_gpu_samples.shape[0]
-            save_imagenet_chunk(all_gpu_samples, cls_idx, os.path.join(f"{opt.imagenet_out_path}", "train", f"{cls_dict['id']}"))
+            save_dataset_chunk(all_gpu_samples, cls_idx, os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_dict['id']}"))
         
         if opt.DDP:
             dist.barrier()
 
 def main():
     opt = get_args()
-    if opt.fill_imagenet:
-        opt.imagenet_stats, real_images = prepare_imagenet_stats(opt)
-        opt.total_images_to_generate = opt.target_images*len(opt.imagenet_stats)-real_images if not opt.force_target else opt.target_images*len(opt.imagenet_stats)
-        print(f"Total Real images: {real_images}")
+    assert opt.fill_imagenet + opt.fill_cifar10 + opt.fill_cifar100 == 1, "Only one dataset can be filled at a time"
+    fill_dataset = opt.fill_imagenet or opt.fill_cifar10 or opt.fill_cifar100
+    if fill_dataset:
+        if opt.fill_imagenet:
+            opt.dataset_stats = prepare_imagenet_stats(opt)
+        elif opt.fill_cifar10:
+            opt.dataset_stats = prepare_cifar10_stats(opt)
+        elif opt.fill_cifar100:
+            opt.dataset_stats = prepare_cifar100_stats(opt)
+        opt.total_images_to_generate = opt.target_images*len(opt.dataset_stats)
         print(f"Total Images to Generate: {opt.total_images_to_generate}")
         print(f"Generating from index {opt.start_idx} to {opt.end_idx}")
-        print("Few options like n_iter, prompt will be automatically set to generate images for ImageNet")
+        print("Few options like n_iter, prompt will be automatically set to generate images for dataset")
     if opt.n_samples % opt.gpus != 0:
         raise ValueError("n_samples must be divisible by gpus")
     if opt.DDP:
         try:
             os.environ['MASTER_ADDR'] = 'localhost'
             os.environ['MASTER_PORT'] = str(random.randint(10000, 20000))
-            if opt.fill_imagenet:
+            if fill_dataset:
                 mp.spawn(fill, nprocs=opt.gpus, args=(opt,))
             else:
                 mp.spawn(run, nprocs=opt.gpus, args=(opt,))
         except KeyboardInterrupt:
             dist.destroy_process_group()
     else:
-        if opt.fill_imagenet:
+        if fill_dataset:
             fill(0, opt)
         else:
             run(0, opt)

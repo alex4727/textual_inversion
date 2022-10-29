@@ -5,6 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Stable-Diffusion T2I Fill CIFAR10",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--plms",
+            "--n_samples", "4",
+            "--fill_cifar10",
+            "--dataset_out_path", "/root/data/data/Synthetic_CIFAR10_Text_only",
+            "--target_images", "5000",
+            "--start_idx", "0",
+            "--end_idx", "9",
+            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            // "--DDP",
+            "--gpus", "1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "Stable-Diffusion T2I Fill ImageNet",
             "type": "python",
             "request": "launch",
@@ -17,7 +39,6 @@
             "--imagenet_path", "/root/data2/data/ImageNet",
             "--imagenet_out_path", "/root/data/data/ImageNet-LT",
             "--target_images", "1300",
-            "--force_target",
             // "--DDP",
             "--gpus", "1",
             ],
@@ -38,6 +59,7 @@
             "--imagenet_out_path", "/root/data/data/ImageNet-LT",
             "--target_images", "1300",
             "--force_target",
+            "--ckpt", ""
             // "--DDP",
             "--gpus", "1",
             ],

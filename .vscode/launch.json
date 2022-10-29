@@ -1,0 +1,105 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Stable-Diffusion T2I Fill ImageNet",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--plms",
+            "--n_samples", "4",
+            "--fill_imagenet",
+            "--imagenet_path", "/root/data2/data/ImageNet",
+            "--imagenet_out_path", "/root/data/data/ImageNet-LT",
+            "--target_images", "1300",
+            "--force_target",
+            // "--DDP",
+            "--gpus", "1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stable-Diffusion T2I Fill ImageNet",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--plms",
+            "--n_samples", "4",
+            "--fill_imagenet",
+            "--imagenet_path", "/root/data2/data/ImageNet",
+            "--imagenet_out_path", "/root/data/data/ImageNet-LT",
+            "--target_images", "1300",
+            "--force_target",
+            // "--DDP",
+            "--gpus", "1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
+            "name": "Stable-Diffusion T2I MultiGPU",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--prompt", "a photo of a magpie'",
+            "--plms",
+            "--n_samples", "2",
+            "--n_iter", "2", 
+            "--seed", "1234",
+            // "--DDP",
+            "--gpus", "1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stable-Diffusion T2I Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0"},
+            "args": ["--prompt", "Two cats with one dog",
+            "--plms",
+            "--n_samples", "3",
+            "--n_iter", "3", 
+            "--seed", "1234",
+            "--H", "512",
+            "--W", "512",
+            "--C", "4",
+            "--ckpt", "/root/data/stable_diffusion_ckpts/v1-5-pruned.ckpt"
+            // "--from_file", "prompts.txt"
+            // "--precision", "full"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stable-Diffusion I2I Inference",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/img2img.py",
+            "args": ["--prompt", " ",
+            "--init-img",
+            "/root/data/data/CIFAR10_PNG/train/bird/5000.png",
+            "--n_samples", "1",
+            "--n_iter", "1",
+            "--seed", "334234",
+            ],
+
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+
+    ]
+}

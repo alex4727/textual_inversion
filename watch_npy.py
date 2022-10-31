@@ -85,7 +85,7 @@ def main():
     parser.add_argument("--watch_dir", type=str, required=True)
     parser.add_argument("--status_file", type=str, default="None", required=False)
     parser.add_argument("--target_images", type=int, required=True)
-    parser.add_argument("--dataset", type=str, required=True)"
+    parser.add_argument("--dataset", type=str, required=True)
     opt = parser.parse_args()
     if opt.dataset == "imagenet":
         dataset_stats, status = prepare_imagenet_stats(opt)
@@ -110,7 +110,7 @@ def main():
             if status[cls_idx] == "not_done" and os.path.exists(npy_name):
                 # if npy file exists and no jpegs
                 print(f"Found {npy_name}... turning into images", flush=True)
-                time.sleep(60)
+                # time.sleep(60)
                 save_jpeg(npy_name, dataset_stats, cls_idx, opt.target_images)
                 status[cls_idx] = "done"
                 update_status_file(status, opt.status_file)

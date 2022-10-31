@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "LDM Fill CIN",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/ldm_imagenet.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--ckpt", "/root/data/Stable-Diffusion-Checkpoints/cin256-v2.ckpt",
+            "--dataset_out_path", "/root/data/data/Synthetic_ImageNet_LDM",
+            "--start_idx", "0",
+            "--end_idx", "999",
+            "--batch_size", "32"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "Stable-Diffusion T2I Fill CIFAR10",
             "type": "python",
             "request": "launch",
@@ -18,7 +34,7 @@
             "--target_images", "5000",
             "--start_idx", "0",
             "--end_idx", "9",
-            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "--ckpt", "/root/data/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             // "--DDP",
             "--gpus", "1",
             ],
@@ -59,7 +75,7 @@
             "--imagenet_out_path", "/root/data/data/ImageNet-LT",
             "--target_images", "1300",
             "--force_target",
-            "--ckpt", ""
+            "--ckpt", "/root/data/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             // "--DDP",
             "--gpus", "1",
             ],
@@ -76,9 +92,12 @@
             "args": [
             "--prompt", "a photo of a magpie'",
             "--plms",
-            "--n_samples", "2",
-            "--n_iter", "2", 
+            "--ddim_steps", "50",
+            "--scale", "1.5",
+            "--n_samples", "10",
+            "--n_iter", "10",
             "--seed", "1234",
+            "--ckpt", "/root/data/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             // "--DDP",
             "--gpus", "1",
             ],

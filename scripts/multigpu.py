@@ -371,7 +371,7 @@ def fill(rank, opt):
     else:
         pass
     
-    sampler = PLMSSampler(model, verbose=(False)) if opt.plms else DDIMSampler(model)
+    sampler = PLMSSampler(model, verbose=(False)) if opt.plms else DDIMSampler(model, verbose=(False))
     batch_size = opt.n_samples if not opt.DDP else opt.n_samples // opt.gpus
     if rank == 0:
         generated_images_counter = 0
@@ -445,7 +445,7 @@ def fill(rank, opt):
 
 def main():
     opt = get_args()
-    assert opt.fill_imagenet + opt.fill_cifar10 + opt.fill_cifar100 == 1, "Only one dataset can be filled at a time"
+    assert opt.fill_imagenet + opt.fill_cifar10 + opt.fill_cifar100 in [0, 1], "Only one dataset can be filled at a time"
     fill_dataset = opt.fill_imagenet or opt.fill_cifar10 or opt.fill_cifar100
     if fill_dataset:
         if opt.fill_imagenet:

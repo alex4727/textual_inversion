@@ -10,11 +10,12 @@ from ldm.modules.diffusionmodules.util import make_ddim_sampling_parameters, mak
 
 
 class DDIMSampler(object):
-    def __init__(self, model, schedule="linear", **kwargs):
+    def __init__(self, model, verbose=True, schedule="linear", **kwargs):
         super().__init__()
         self.model = model
         self.ddpm_num_timesteps = model.num_timesteps
         self.schedule = schedule
+        self.verbose = verbose
 
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
@@ -91,7 +92,8 @@ class DDIMSampler(object):
         # sampling
         C, H, W = shape
         size = (batch_size, C, H, W)
-        print(f'Data shape for DDIM sampling is {size}, eta {eta}')
+        if self.verbose:
+            print(f'Data shape for DDIM sampling is {size}, eta {eta}')
 
         samples, intermediates = self.ddim_sampling(conditioning, size,
                                                     callback=callback,
@@ -133,10 +135,11 @@ class DDIMSampler(object):
         intermediates = {'x_inter': [img], 'pred_x0': [img]}
         time_range = reversed(range(0,timesteps)) if ddim_use_original_steps else np.flip(timesteps)
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
-        print(f"Running DDIM Sampling with {total_steps} timesteps")
-
-        iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
-
+        if self.verbose:
+            print(f"Running DDIM Sampling with {total_steps} timesteps")
+            iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
+        else:
+            iterator = time_range
         for i, step in enumerate(iterator):
             index = total_steps - i - 1
             ts = torch.full((b,), step, device=device, dtype=torch.long)
@@ -228,9 +231,11 @@ class DDIMSampler(object):
 
         time_range = np.flip(timesteps)
         total_steps = timesteps.shape[0]
-        print(f"Running DDIM Sampling with {total_steps} timesteps")
-
-        iterator = tqdm(time_range, desc='Decoding image', total=total_steps)
+        if self.verbose:
+            print(f"Running DDIM Sampling with {total_steps} timesteps")
+            iterator = tqdm(time_range, desc='Decoding image', total=total_steps)
+        else:
+            iterator = time_range
         x_dec = x_latent
         for i, step in enumerate(iterator):
             index = total_steps - i - 1

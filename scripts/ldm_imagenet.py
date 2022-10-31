@@ -96,7 +96,7 @@ def main():
         all_samples = None
         with torch.no_grad():
             with model.ema_scope():
-                for n in tqdm(range(3)):
+                for n in tqdm(range(n_iter)):
                     uc = model.get_learned_conditioning({model.cond_stage_key: torch.tensor(opt.batch_size*[1000]).to(model.device)})
                     xc = torch.tensor(opt.batch_size*[class_label])                    
                     c = model.get_learned_conditioning({model.cond_stage_key: xc.to(model.device)})                        

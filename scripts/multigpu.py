@@ -399,7 +399,7 @@ def fill(rank, opt):
             with precision_scope("cuda"):
                 with model.ema_scope():
                     tic = time.time()
-                    per_gpu_samples = None
+                    all_gpu_samples = None
                     for n in range(n_iter):
                         for prompts in data:
                             uc = None
@@ -421,15 +421,21 @@ def fill(rank, opt):
 
                             x_samples_ddim = model.decode_first_stage(samples_ddim)
                             x_samples_ddim = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
-                            per_gpu_samples = x_samples_ddim if per_gpu_samples is None else torch.cat([per_gpu_samples, x_samples_ddim], dim=0)
+                            tmp_holder = [torch.zeros_like(x_samples_ddim) for _ in range(opt.gpus)]
+                            # all gather outputs from all gpus
+                            if opt.DDP:
+                                dist.all_gather(tmp_holder, x_samples_ddim) 
+                            else: 
+                                tmp_holder = [x_samples_ddim]
+                            # concat all gpus outputs and send it to cpu
+                            tmp_holder = torch.cat(tmp_holder, dim=0).cpu()
+                            # concat samples and save it on rank 0 process
+                            if rank == 0:
+                                all_gpu_samples = tmp_holder if all_gpu_samples is None else torch.cat([all_gpu_samples, tmp_holder], dim=0)
+                            if opt.DDP:
+                                dist.barrier()
 
-        all_gpu_samples = [torch.zeros_like(per_gpu_samples) for _ in range(opt.gpus)]
-        if opt.DDP:
-            dist.all_gather(all_gpu_samples, per_gpu_samples)
-        else:
-            all_gpu_samples =[per_gpu_samples]
-        if rank == 0: 
-            all_gpu_samples = torch.cat(all_gpu_samples, dim=0)
+        if rank == 0:
             all_gpu_samples = all_gpu_samples[:-n_drop] if n_drop > 0 else all_gpu_samples
             generated_images_counter += all_gpu_samples.shape[0]
             save_dataset_chunk(all_gpu_samples, cls_idx, os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_dict['id']}"))

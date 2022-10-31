@@ -400,7 +400,7 @@ def fill(rank, opt):
                 with model.ema_scope():
                     tic = time.time()
                     all_gpu_samples = None
-                    for n in range(n_iter):
+                    for n in tqdm(range(n_iter), disable=(rank!=0)):
                         for prompts in data:
                             uc = None
                             if opt.scale != 1.0:

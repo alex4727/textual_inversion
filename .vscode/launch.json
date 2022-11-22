@@ -15,7 +15,7 @@
             "--dataset_out_path", "/root/data/data/Synthetic_ImageNet_LDM",
             "--start_idx", "0",
             "--end_idx", "999",
-            "--batch_size", "32"
+            "--batch_size", "16"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

@@ -129,7 +129,12 @@ def get_args():
     parser.add_argument(
         "--fill_imagenet",
         action='store_true',
-        help="whether to fill dataset"
+        help="whether to fill imagenet"
+    )
+    parser.add_argument(
+        "--fill_small_imagenet",
+        action='store_true',
+        help="whether to fill small imagenet"
     )
     parser.add_argument(
         "--fill_cifar10",
@@ -257,6 +262,22 @@ def prepare_imagenet_stats(opt):
             imagenet_stats[cls_idx] = sample_dict
             os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
     return imagenet_stats
+
+def prepare_small_imagenet_stats(opt):
+    print("Preparing small imagenet stats")
+    small_imagenet_stats = dict()
+    with open("dataset_info/Small_ImageNet.txt", "r") as f:
+        lines = f.read().splitlines()
+        cls_ids, cls_idxs, cls_names = zip(*[i.split(" ") for i in lines])
+        for cls_id, cls_idx, cls_name in zip(cls_ids, cls_idxs, cls_names):
+            sample_dict = dict()
+            sample_dict['name'] = cls_name
+            sample_dict['id'] = cls_id
+            sample_dict['idx'] = cls_idx
+            sample_dict['prompt'] = f"a photo of a {cls_name.replace('_', ' ')}"
+            small_imagenet_stats[cls_idx] = sample_dict
+            os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
+    return small_imagenet_stats
 
 def prepare_cifar10_stats(opt):
     print("Preparing cifar10 stats")
@@ -445,8 +466,8 @@ def fill(rank, opt):
 
 def main():
     opt = get_args()
-    assert opt.fill_imagenet + opt.fill_cifar10 + opt.fill_cifar100 in [0, 1], "Only one dataset can be filled at a time"
-    fill_dataset = opt.fill_imagenet or opt.fill_cifar10 or opt.fill_cifar100
+    assert opt.fill_imagenet + opt.fill_cifar10 + opt.fill_cifar100 + opt.fill_small_imagenet in [0, 1], "Only one dataset can be filled at a time"
+    fill_dataset = opt.fill_imagenet or opt.fill_cifar10 or opt.fill_cifar100 or opt.fill_small_imagenet
     if fill_dataset:
         if opt.fill_imagenet:
             opt.dataset_stats = prepare_imagenet_stats(opt)
@@ -454,6 +475,8 @@ def main():
             opt.dataset_stats = prepare_cifar10_stats(opt)
         elif opt.fill_cifar100:
             opt.dataset_stats = prepare_cifar100_stats(opt)
+        elif opt.fill_small_imagenet:
+            opt.dataset_stats = prepare_small_imagenet_stats(opt)
         opt.total_images_to_generate = opt.target_images*len(opt.dataset_stats)
         print(f"Total Images to Generate: {opt.total_images_to_generate}")
         print(f"Generating from index {opt.start_idx} to {opt.end_idx}")

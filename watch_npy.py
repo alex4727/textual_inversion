@@ -24,6 +24,27 @@ def prepare_imagenet_stats(opt):
 
     return imagenet_stats, status
 
+def prepare_small_imagenet_stats(opt):
+    print("Preparing small imagenet stats")
+    small_imagenet_stats = dict()
+    with open("dataset_info/Small_ImageNet.txt", "r") as f:
+        lines = f.read().splitlines()
+        cls_ids, cls_idxs, cls_names = zip(*[i.split(" ") for i in lines])
+        for cls_id, cls_idx, cls_name in zip(cls_ids, cls_idxs, cls_names):
+            sample_dict = dict()
+            sample_dict['name'] = cls_name
+            sample_dict['id'] = cls_id
+            sample_dict['idx'] = cls_idx
+            sample_dict['prompt'] = f"a photo of a {cls_name.replace('_', ' ')}"
+            sample_dict['folder'] = os.path.join(f"{opt.watch_dir}", "train", f"{cls_id}")
+            small_imagenet_stats[cls_idx] = sample_dict
+
+    status = dict()
+    for cls_idx, cls_dict in small_imagenet_stats.items():
+        status[cls_idx] = "not_done"
+        
+    return small_imagenet_stats, status
+
 def prepare_cifar10_stats(opt):
     print("Preparing cifar10 stats")
     cifar10_stats = dict()
@@ -89,6 +110,8 @@ def main():
     opt = parser.parse_args()
     if opt.dataset == "imagenet":
         dataset_stats, status = prepare_imagenet_stats(opt)
+    elif opt.dataset == "small_imagenet":
+        dataset_stats, status = prepare_small_imagenet_stats(opt)
     elif opt.dataset == "cifar10":
         dataset_stats, status = prepare_cifar10_stats(opt)
     elif opt.dataset == "cifar100":

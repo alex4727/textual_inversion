@@ -110,7 +110,7 @@
             "request": "launch",
             "program": "scripts/multigpu.py",
             "env": {"CUDA_VISIBLE_DEVICES":"0"},
-            "args": ["--prompt", "Two cats with one dog",
+            "args": ["--prompt", "A photo of Arctic fox",
             "--plms",
             "--n_samples", "3",
             "--n_iter", "3", 
@@ -118,7 +118,8 @@
             "--H", "512",
             "--W", "512",
             "--C", "4",
-            "--ckpt", "/root/data/stable_diffusion_ckpts/v1-5-pruned.ckpt"
+            "--ckpt", "/root/data/stable_diffusion_ckpts/v1-5-pruned.ckpt",
+            "--scale", "15"
             // "--from_file", "prompts.txt"
             // "--precision", "full"
             ],

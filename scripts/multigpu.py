@@ -232,6 +232,7 @@ def save_image_grid(all_gpu_samples, opt, grid=True):
         grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
         img = Image.fromarray(grid.astype(np.uint8))
         img.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
+        print(f'saved as grid-{grid_count:04}.png')
         grid_count += 1
 
 def save_dataset(all_gpu_samples, cls_idx, output_path):

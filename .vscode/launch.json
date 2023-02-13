@@ -5,6 +5,25 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Textual Inversion",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0"},
+            "args": [
+            "--base", "configs/stable-diffusion/v1-finetune.yaml",
+            "-t",
+            "--actual_resume", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "-n", "test",
+            "--gpus", "0,",
+            "--data_root", "/root/code/sample_data/custom_diffusion_data/twice-single",
+            "--init_word", "*",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "LDM Fill CIN",
             "type": "python",
             "request": "launch",
@@ -90,14 +109,14 @@
             "program": "scripts/multigpu.py",
             "env": {"CUDA_VISIBLE_DEVICES":"0",},
             "args": [
-            "--prompt", "a photo of a magpie'",
+            "--prompt", "Hermione Granger fighting Harry Potter",
             "--plms",
             "--ddim_steps", "50",
-            "--scale", "1.5",
-            "--n_samples", "10",
-            "--n_iter", "10",
+            "--scale", "7.5",
+            "--n_samples", "4",
+            "--n_iter", "4",
             "--seed", "1234",
-            "--ckpt", "/root/data/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             // "--DDP",
             "--gpus", "1",
             ],

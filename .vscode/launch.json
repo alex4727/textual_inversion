@@ -5,19 +5,53 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Textual Inversion",
+            "name": "Stable Diffusion random steps test",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/stable_txt2img.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0"},
+            "args": [
+            "--n_samples", "4",
+            "--n_iter", "8",
+            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "--prompt", "a photo of corncob",
+            "--embedding_path", "/root/code/textual_inversion/embedding.pt",
+            "--ddim_steps", "-1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Stable-Diffusion T2I",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/stable_txt2img_corn.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"3"},
+            "args": [
+            "--prompt", "a photo of *",
+            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "--embedding_path", "/root/code/textual_inversion/embedding.pt",
+            "--n_samples", "4",
+            "--n_iter", "4",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
+            "name": "Textual Inversion train",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "env": {"CUDA_VISIBLE_DEVICES":"0"},
             "args": [
-            "--base", "configs/stable-diffusion/v1-finetune.yaml",
+            "--base", "configs/stable-diffusion/v1-finetune_test.yaml",
             "-t",
             "--actual_resume", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             "-n", "test",
             "--gpus", "0,",
-            "--data_root", "/root/code/sample_data/custom_diffusion_data/twice-single",
+            "--data_root", "/root/data/Datasets/IM_Small_ImageNet/train/n07715103",
             "--init_word", "*",
+            "--logdir", "ti_test"
             ],
             "console": "integratedTerminal",
             "justMyCode": true
@@ -107,7 +141,7 @@
             "type": "python",
             "request": "launch",
             "program": "scripts/multigpu.py",
-            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "env": {"CUDA_VISIBLE_DEVICES":"3",},
             "args": [
             "--prompt", "Hermione Granger fighting Harry Potter",
             "--plms",

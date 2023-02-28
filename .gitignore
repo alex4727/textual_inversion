@@ -2,6 +2,17 @@ outputs/
 models/ldm/stable-diffusion-v1/model.ckpt
 logs/
 src/
+*.png
+*.JPG
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tif
+*.tiff
+*.pt 
+run*
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

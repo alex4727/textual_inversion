@@ -1,6 +1,5 @@
 import argparse, os, sys, glob
 import torch
-import random
 import numpy as np
 from omegaconf import OmegaConf
 from PIL import Image
@@ -242,14 +241,21 @@ def main():
                             uc = model.get_learned_conditioning(batch_size * [""])
                         if isinstance(prompts, tuple):
                             prompts = list(prompts)
+                        prompt1 = "a photo of *"
+                        prompt2 = "a photo of @"
+                        prompt3 = "a photo of #"
+                        prompt4 = "a photo of $"
+                        prompts = [prompt1, prompt2, prompt3, prompt4]
                         c = model.get_learned_conditioning(prompts)
+                        d = torch.zeros_like(c)
+                        for i in range(len(c)):
+                            x = torch.randn(4)
+                            a0,a1,a2,a3 = x / x.sum()
+                            d[i] = a0*c[0] + a1*c[1] + a2*c[2] + a3*c[3]
+
                         shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
-                        ddim_steps = opt.ddim_steps
-                        if opt.ddim_steps == -1:
-                            ddim_steps = random.choice([10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 33, 34, 35, 38, 39, 41, 42, 44, 46, 48, 51, 53, 56, 59, 63, 67, 72, 77, 84, 91, 112, 126, 143, 167])
-                            print(ddim_steps)
-                        samples_ddim, _ = sampler.sample(S=ddim_steps,
-                                                         conditioning=c,
+                        samples_ddim, _ = sampler.sample(S=opt.ddim_steps,
+                                                         conditioning=d,
                                                          batch_size=opt.n_samples,
                                                          shape=shape,
                                                          verbose=False,

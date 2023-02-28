@@ -84,7 +84,7 @@ data:
         size: 512
         set: train
         per_image_tokens: false
-        repeats: 10
+        repeats: 20
     validation:
       target: ldm.data.personalized.PersonalizedBase
       params:
@@ -107,4 +107,4 @@ lightning:
 
   trainer:
     benchmark: True
-    max_steps: 65000
+    max_steps: 10000

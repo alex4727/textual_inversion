@@ -5,6 +5,33 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Multi-GPU TI",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/multigpu_ti.py",
+            "env": {"CUDA_VISIBLE_DEVICES":"0",},
+            "args": [
+            "--ddim_steps", "50",
+            "--scale", "7.5",
+            "--n_samples", "4",
+            "--seed", "1234",
+            "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
+            "--fill_small_imagenet",
+            "--target_images", "1300",
+            "--start_idx", "4",
+            "--end_idx", "4",
+            "--embedding_path", "/root/code/textual_inversion/logs",
+            "--embedding_step", "9999",
+            "--dataset_out_path", "/root/code/textual_inversion/outputs/asdf",
+
+            // "--DDP",
+            "--gpus", "1",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+
+        {
             "name": "Stable Diffusion random steps test",
             "type": "python",
             "request": "launch",
@@ -49,9 +76,9 @@
             "--actual_resume", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             "-n", "test",
             "--gpus", "0,",
-            "--data_root", "/root/data/Datasets/IM_Small_ImageNet/train/n07715103",
+            "--data_root", "/root/data/Datasets/IM_Small_ImageNet/train/n01632458",
             "--init_word", "*",
-            "--logdir", "ti_test"
+            // "--logdir", "ti_test"
             ],
             "console": "integratedTerminal",
             "justMyCode": true

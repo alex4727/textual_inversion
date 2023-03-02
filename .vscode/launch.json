@@ -14,7 +14,6 @@
             "--ddim_steps", "50",
             "--scale", "7.5",
             "--n_samples", "4",
-            "--seed", "1234",
             "--ckpt", "/root/code/Stable-Diffusion-Checkpoints/v1-5-pruned.ckpt",
             "--fill_small_imagenet",
             "--target_images", "1300",
@@ -30,7 +29,6 @@
             "console": "integratedTerminal",
             "justMyCode": true
         },
-
         {
             "name": "Stable Diffusion random steps test",
             "type": "python",

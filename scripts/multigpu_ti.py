@@ -192,7 +192,7 @@ def get_args():
     )
     parser.add_argument(
         "--embedding_step", 
-        type=str,
+        type=int,
         default=-1,
         help="which embedding ckpt step to use, -1 is mixed"
     )
@@ -289,7 +289,7 @@ def prepare_small_imagenet_stats(opt):
             sample_dict['idx'] = cls_idx
             sample_dict['num_real_imgs'] = cls_num_rimage
             sample_dict['prompt'] = f"a photo of *"
-            if opt.embedding_path != -1:
+            if opt.embedding_step != -1:
                 sample_dict["embedding_path"] = [f"{opt.embedding_path}/{cls_id}/checkpoints/embeddings_gs-{opt.embedding_step}.pt"]
             else:
                 sample_dict["embedding_path"] = [f for f in os.listdir(f"{opt.embedding_path}/{cls_id}/checkpoints/") if f.startswith("embeddings_gs")]
@@ -445,7 +445,8 @@ def fill(rank, opt):
                     all_gpu_samples = None
                     for n in tqdm(range(n_iter), disable=(rank!=0)):
                         for prompts in data:
-                            model.embedding_manager.load(random.choice(cls_dict['embedding_path']))
+                            e_path = random.choice(cls_dict['embedding_path'])
+                            model.embedding_manager.load(e_path)
                             uc = None
                             if opt.scale != 1.0:
                                 uc = model.get_learned_conditioning(batch_size * [""])

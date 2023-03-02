@@ -292,7 +292,7 @@ def prepare_small_imagenet_stats(opt):
             if opt.embedding_step != -1:
                 sample_dict["embedding_path"] = [f"{opt.embedding_path}/{cls_id}/checkpoints/embeddings_gs-{opt.embedding_step}.pt"]
             else:
-                sample_dict["embedding_path"] = [f for f in os.listdir(f"{opt.embedding_path}/{cls_id}/checkpoints/") if f.startswith("embeddings_gs")]
+                sample_dict["embedding_path"] = [f"{opt.embedding_path}/{cls_id}/checkpoints/{f}" for f in os.listdir(f"{opt.embedding_path}/{cls_id}/checkpoints/") if f.startswith("embeddings_gs")]
             small_imagenet_stats[cls_idx] = sample_dict
             os.makedirs(os.path.join(f"{opt.dataset_out_path}", "train", f"{cls_id}"), exist_ok=True)
     return small_imagenet_stats
